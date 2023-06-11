@@ -43,6 +43,8 @@ You should be able to access the [swagger page](http://localhost:3000/api)
 
 ## Test
 
+This app has a pre-commit hook so as to run unit tests before commiting. E2E tests should run against a disposable database
+
 ```bash
 # unit tests
 $ yarn run test
