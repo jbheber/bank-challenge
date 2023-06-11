@@ -6,13 +6,23 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - postgres
-      - redis
+      - seed
     networks:
       - banknetwork
-    secrets:
-      - db_user
-      - db_password
+
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile.seed
+    ports:
+      - 3001:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - banknetwork
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/bankdb
 
   postgres:
     image: postgres
@@ -20,28 +30,18 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER_FILE: /run/secrets/db_user
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      POSTGRES_DB_FILE: /run/secrets/db_name
-    secrets:
-      - db_user
-      - db_password
-      - db_name
+      - POSTGRES_DB=bankdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     networks:
       - banknetwork
     volumes:
-      - ./healthchecks:/healthchecks
+      - ~/.docker-conf/bank/db:/var/lib/postgresql/data
     healthcheck:
-      test: /healthchecks/postgres-healthcheck
-      interval: "5s"
-
-  redis:
-    image: redis
-    restart: always
-    ports:
-      - "6379:6379"
-    networks:
-      - banknetwork
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4
@@ -56,6 +56,7 @@ services:
 
 networks:
   banknetwork:
+    driver: bridge
 
 secrets:
   db_user:
