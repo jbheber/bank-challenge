@@ -21,5 +21,6 @@ model User {
   updatedAt DateTime @default(now())
   name      String
   email     String   @unique
+  password  String
   role      Role     @default(USER)
 }
