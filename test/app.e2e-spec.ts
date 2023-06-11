@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 
-describe('AppController (e2e)', () => {
+describe('(e2e)', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
@@ -172,6 +172,52 @@ describe('AppController (e2e)', () => {
           .set('Accept', 'application/json')
           .set('Authorization', `Bearer ${userToken}`)
           .expect(401);
+      });
+    });
+  });
+
+  describe('Transactions', () => {
+    describe('v1/transactions (POST)', () => {
+      describe('/v1/users (POST)', () => {
+        it('201 OK', () => {
+          return request(app.getHttpServer())
+            .post('/transactions')
+            .send({
+              fromAccountId: 1,
+              toAccountId: 4,
+              amount: 300,
+              description: 'testing 1',
+            })
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(201);
+        });
+        it('400 Error', () => {
+          return request(app.getHttpServer())
+            .post('/transactions')
+            .send({
+              fromAccountId: 1,
+              toAccountId: 1,
+              amount: 300,
+              description: 'testing 1',
+            })
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(400);
+        });
+        it('403 Error', () => {
+          return request(app.getHttpServer())
+            .post('/transactions')
+            .send({
+              fromAccountId: 5,
+              toAccountId: 1,
+              amount: 300,
+              description: 'testing 1',
+            })
+            .set('Accept', 'application/json')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(403);
+        });
       });
     });
   });
