@@ -1,0 +1,51 @@
+version: "3.9"
+services:
+  app:
+    image: "${TESTING_IMAGE}"
+
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    secrets:
+      - db_user
+      - db_password
+      - db_name
+    networks:
+      - banknetwork
+    volumes:
+      - ./healthchecks:/healthchecks
+    healthcheck:
+      test: /healthchecks/postgres-healthcheck
+      interval: "5s"
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - banknetwork
+
+  check:
+    image: "${TESTING_IMAGE}"
+    depends_on:
+      allhands22:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    command: curl --fail http://app:80 || exit 1
+
+networks:
+  banknetwork:
+
+secrets:
+  db_user:
+    file: ./secrets/db_user.txt
+  db_password:
+    file: ./secrets/db_password.txt
+  pgadmin_email:
+    file: ./secrets/pgadmin_email.txt
+  pgadmin_password:
+    file: ./secrets/pgadmin_password.txt
