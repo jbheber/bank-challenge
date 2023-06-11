@@ -65,6 +65,8 @@ Additionally it will give you a pgadmin to see the database.
 
 To connect the pgadmin GUI to the postgres database add the following connection. The user/pass for the postgres server are in the secrets folder.
 
+**NOTE:** If you already have a postgres server in your machine the ports will collide and the app will opt for the local one, ignoring the docker port
+
 <img src="images/connection.png"
      alt="Connection"
      style="width: 50%; float: left;" />
