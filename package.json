@@ -19,7 +19,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed": "yarn prisma db seed"
+    "seed": "yarn prisma db seed",
+    "postinstall": "husky install"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
@@ -68,7 +69,8 @@
     "ts-node": "^10.0.0",
     "tsconfig-paths": "4.2.0",
     "typescript": "^5.0.0",
-    "yarn": "^1.22.19"
+    "yarn": "^1.22.19",
+    "husky": "^8.0.0"
   },
   "jest": {
     "moduleFileExtensions": [
