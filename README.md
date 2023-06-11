@@ -10,6 +10,22 @@
 yarn install --frozen-lockfile
 ```
 
+## Run locally
+
+Pre: Needs a local postgres server
+
+* Set the connection string in the .env
+
+```txt
+DATABASE_URL="postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:5432/{POSTGRES_DBNAME}?schema=public"
+```
+
+* create the database and seed some data
+
+```bash
+yarn prisma db push && yarn prisma db seed
+```
+
 ## Running the app
 
 ```bash
@@ -22,6 +38,8 @@ $ yarn run start:dev
 # production mode
 $ yarn run start:prod
 ```
+
+You should be able to access the [swagger page](http://localhost:3000/api)
 
 ## Test
 

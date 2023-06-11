@@ -2,16 +2,21 @@ version: "3.9"
 services:
   app:
     image: "${TESTING_IMAGE}"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - banknetwork
 
   postgres:
     image: postgres
     restart: always
     ports:
       - "5432:5432"
-    secrets:
-      - db_user
-      - db_password
-      - db_name
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: rootpwd
+      POSTGRES_DB: bankdb
     networks:
       - banknetwork
     volumes:
@@ -29,23 +34,12 @@ services:
       - banknetwork
 
   check:
-    image: "${TESTING_IMAGE}"
+    image: alpine/curl:3.14
     depends_on:
-      allhands22:
+      app:
         condition: service_started
-      postgres:
-        condition: service_healthy
-    command: curl --fail http://app:80 || exit 1
+    command: curl --fail http://app:3000/v1/health/ping || exit 1
 
 networks:
   banknetwork:
 
-secrets:
-  db_user:
-    file: ./secrets/db_user.txt
-  db_password:
-    file: ./secrets/db_password.txt
-  pgadmin_email:
-    file: ./secrets/pgadmin_email.txt
-  pgadmin_password:
-    file: ./secrets/pgadmin_password.txt

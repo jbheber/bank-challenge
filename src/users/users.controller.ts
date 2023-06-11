@@ -7,7 +7,6 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UnauthorizedException,
   UseGuards,
   Version,
 } from '@nestjs/common';
@@ -18,10 +17,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RoleGuard } from '../auth/roles/role.guard';
 import { Roles } from '../auth/roles/roles.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
@@ -34,8 +33,6 @@ export class UsersController {
 
   @Post()
   @Version('1')
-  @Roles(Role.ADMIN)
-  @UseGuards(JwtAuthGuard, RoleGuard)
   @ApiBearerAuth()
   @ApiCreatedResponse({ type: UserEntity })
   async create(@Body() createUserDto: CreateUserDto) {
