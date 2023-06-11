@@ -59,7 +59,7 @@ $ yarn run test:cov
 ## Run in docker-compose
 
 ```bash
-docker-compose up
+docker-compose up --build
 ```
 
 This will spin up the app in a docker container with a postgres server and a redis server.
