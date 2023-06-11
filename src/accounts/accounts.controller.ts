@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -18,6 +19,7 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import * as moment from 'moment';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { UserEntity } from '../users/entities/user.entity';
@@ -26,6 +28,7 @@ import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { AccountEntity } from './entities/account.entity';
+import { StatementEntity } from './entities/statement.entity';
 
 @Controller('accounts')
 @ApiTags('account')
@@ -79,6 +82,57 @@ export class AccountsController {
     await this.usersService.checkSelfUser(currentUser, account?.userId ?? 0);
 
     return new AccountEntity(account);
+  }
+
+  @Get(':id/statement')
+  @Version('1')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: StatementEntity })
+  async findOneStatement(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() currentUser: UserEntity,
+    @Query('date') date: string,
+    @Query('skip', ParseIntPipe) skip: number,
+    @Query('take', ParseIntPipe) take: number,
+  ) {
+    const dateObject = moment(date);
+    if (!dateObject.isValid() || dateObject.isAfter()) {
+      throw new BadRequestException(`Invalid date`);
+    }
+    const transactionsQuery = {
+      skip,
+      take,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      where: {
+        createdAt: {
+          gte: new Date(dateObject.startOf('month').toISOString()),
+          lte: new Date(dateObject.endOf('month').toISOString()),
+        },
+      },
+    };
+    const interestHistoryQuery = {
+      where: {
+        createdAt: {
+          gte: new Date(dateObject.startOf('month').toISOString()),
+          lte: new Date(dateObject.endOf('month').toISOString()),
+        },
+      },
+    };
+    const account = await this.accountsService.findOne(
+      id,
+      true,
+      transactionsQuery,
+      interestHistoryQuery,
+    );
+    if (!account) {
+      throw new NotFoundException(`Account ${id} not found`);
+    }
+    await this.usersService.checkSelfUser(currentUser, account?.userId ?? 0);
+
+    return new StatementEntity(account as any, dateObject);
   }
 
   @Patch(':id')

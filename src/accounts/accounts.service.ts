@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAccountDto } from './dto/create-account.dto';
-import { UpdateAccountDto } from './dto/update-account.dto';
-import { DatabaseService } from '../database/database.service';
-import { UserEntity } from '../users/entities/user.entity';
 import { Account, Account_Type, Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
-
+import * as moment from 'moment';
+import { DatabaseService } from '../database/database.service';
+import { UserEntity } from '../users/entities/user.entity';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 @Injectable()
 export class AccountsService {
   private accountInterest: number;
@@ -34,9 +34,19 @@ export class AccountsService {
     });
   }
 
-  findOne(id: number) {
+  findOne(
+    id: number,
+    includeBank = false,
+    transactionHistoryQuery: any = null,
+    interestHistoryQuery: any = null,
+  ) {
     return this.databaseService.client.account.findUnique({
       where: { id },
+      include: {
+        Bank: includeBank,
+        transactions: transactionHistoryQuery ?? false,
+        Interest_History: interestHistoryQuery ?? false,
+      },
     });
   }
 
