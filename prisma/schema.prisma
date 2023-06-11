@@ -15,12 +15,55 @@ enum Role {
   ADMIN
 }
 
+enum Account_Type {
+  SAVINGS
+  CURRENT
+  BASIC_SAVINGS
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
   name      String
-  email     String   @unique
+  email     String    @unique
   password  String
-  role      Role     @default(USER)
+  role      Role      @default(USER)
+  accounts  Account[]
+}
+
+model Bank {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  name      String    @unique
+  address   String?
+  phone     String?
+  accounts  Account[]
+}
+
+model Account {
+  id           Int           @id @default(autoincrement())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now())
+  uuid         String        @unique @default(uuid())
+  account_type Account_Type  @default(CURRENT)
+  balance      Decimal       @default(0) @db.Decimal(9, 2)
+  User         User?         @relation(fields: [userId], references: [id])
+  userId       Int?
+  Bank         Bank?         @relation(fields: [bankId], references: [id])
+  bankId       Int?
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  description String
+  ref         Int      @unique @default(autoincrement())
+  balance     Decimal  @default(0) @db.Decimal(9, 2)
+  withdrawal  Decimal  @default(0) @db.Decimal(9, 2)
+  deposit     Decimal  @default(0) @db.Decimal(9, 2)
+  Account     Account? @relation(fields: [accountId], references: [id])
+  accountId   Int?
 }
