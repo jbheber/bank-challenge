@@ -59,7 +59,7 @@ export class UsersService {
       requesterUser.role === Role.USER &&
       Number(requesterUser.id) !== Number(user?.id)
     ) {
-      throw new UnauthorizedException('Can only get self information');
+      throw new UnauthorizedException('Unauthorized user');
     }
     return user;
   }
